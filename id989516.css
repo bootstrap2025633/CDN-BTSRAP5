@@ -1,67 +1,152 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
 
+/* === BASE STYLES & RESETS === */
 * {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
 
+/* Root variables for easy color management */
+:root {
+  --primary-color: #00bfff; /* Bright blue/cyan */
+  --secondary-color: #0077ff; /* Deeper blue */
+  --bg-primary: #080d1a; /* Darkest background */
+  --text-light: #fff;
+  --text-muted: #ccc;
+  --header-bg: rgba(255,255,255,0.05);
+  --border-color: rgba(255,255,255,0.1);
+  --card-bg: rgba(255,255,255,0.05);
+  --max-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Unified shadow for a cleaner look */
+}
+
+/* Hide content during loading */
+body.loading > * {
+    visibility: hidden;
+}
+
 body {
-  background: radial-gradient(circle at top, #080d1a, #000);
-  color:#fff;
+  background: radial-gradient(circle at top, var(--bg-primary), #000);
+  color:var(--text-light);
   overflow-x:hidden;
   min-height:100vh;
+}
+
+/* === PRE-LOADER STYLES (Enhanced) === */
+#preloader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.7s ease-out, visibility 0.7s ease-out; /* Slower fade-out */
+}
+body:not(.loading) #preloader {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.spinner {
+    width: 80px; /* Larger spinner */
+    height: 80px;
+    border: 6px solid rgba(0, 191, 255, 0.3); /* Lighter outer ring */
+    border-top-color: var(--primary-color); /* Primary color for the moving part */
+    border-radius: 50%;
+    animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; /* More sophisticated animation timing */
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Subtle inner shadow on spinner for depth */
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* === STAR CANVAS === */
 canvas#stars {position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;}
 
-/* === HEADER === */
+/* === HEADER (Sticky & Blurry) === */
 header {
-  position:fixed;
+  position:sticky;
   top:0; left:0; width:100%;
   display:flex; justify-content:space-between; align-items:center;
   padding:20px 60px;
-  backdrop-filter:blur(10px);
-  background:rgba(255,255,255,0.05);
-  border-bottom:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(15px);
+  background:var(--header-bg);
+  border-bottom:1px solid var(--border-color);
   z-index:10;
+  transition: background 0.3s ease;
 }
 
 .logo {
-  font-size:1.5em;
+  font-size:1.6em;
   letter-spacing:2px;
   font-weight:700;
+  color: var(--primary-color);
 }
-/* Style for the new image logo */
 .logo img {
-    height: 35px; /* Adjust as needed */
-    width: auto;}
-
+    height: 35px;
+    width: auto;
+    filter: none; /* Removed glow effect on logo image */
+}
 
 nav a {
-  margin-left:25px;
-  color:#aaa;
+  margin-left:35px;
+  color:#aaa; /* Back to base muted color */
   text-decoration:none;
-  transition:.3s;
+  transition:color .3s, transform .2s;
+  font-weight: 500;
+  position: relative;
 }
-nav a:hover {color:#00bfff;}
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease-out;
+}
+nav a:hover::after {
+    width: 100%;
+}
+nav a:hover {
+    color:var(--primary-color);
+    transform: translateY(-2px);
+}
 
-/* === HERO SECTION === */
+
+/* === HERO SECTION (Entrance Animation) === */
 .hero {
   height:100vh;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   text-align:center;
   z-index:2; position:relative;
+  /* Initial state for entrance animation, controlled by JS */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease-out 0.5s, transform 1s ease-out 0.5s;
+}
+
+/* Class added by JS when page is fully loaded */
+body:not(.loading) .hero { 
+    opacity: 1; 
+    transform: translateY(0); 
 }
 
 .hero h1 {
-  font-size:3.5em;
-  letter-spacing:3px;
+  font-size:4.5em;
+  letter-spacing:5px;
+  text-shadow: none; /* Removed glow effect */
 }
 .hero p {
-  margin:15px 0;
-  color:#ccc;
-  font-size:1.3em;
+  margin:25px 0 35px;
+  color:var(--text-muted);
+  font-size:1.4em;
+  font-weight: 300;
 }
 
-/* === GENERAL CONTENT SECTIONS (About & Contact) === */
+/* === GENERAL CONTENT SECTIONS (Scroll Animation) === */
 .content-section {
   min-height: 50vh;
   padding: 100px 60px;
@@ -69,20 +154,31 @@ nav a:hover {color:#00bfff;}
   position: relative;
   max-width: 1200px;
   margin: 0 auto;
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+/* Class added by JavaScript Intersection Observer */
+.content-section.in-view {
+    opacity: 1;
+    transform: translateY(0);
 }
 .content-section h2 {
-  font-size: 2.5em;
-  color: #00bfff;
-  margin-bottom: 30px;
+  font-size: 3em;
+  color: var(--primary-color);
+  margin-bottom: 40px;
   text-align: center;
+  text-shadow: none; /* Removed glow effect */
 }
 .content-section p {
   line-height: 1.8;
   margin-bottom: 20px;
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+  font-weight: 300;
 }
 
 /* === CONTACT SECTION STYLING === */
@@ -91,67 +187,101 @@ nav a:hover {color:#00bfff;}
   flex-direction: column;
   max-width: 500px;
   margin: 30px auto;
-  gap: 15px;
+  gap: 20px;
 }
 .contact-section input, .contact-section textarea {
-  padding: 15px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 1em;
+  padding: 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-light);
+  font-size: 1.1em;
   resize: none;
+  transition: border-color 0.3s, background 0.3s;
+}
+.contact-section input::placeholder, .contact-section textarea::placeholder {
+    color: #888;
 }
 .contact-section input:focus, .contact-section textarea:focus {
-    outline: 1px solid #00bfff;
+    outline: none;
+    border: 1px solid var(--primary-color);
+    background: rgba(0, 191, 255, 0.05);
 }
 .contact-info {
-    font-size: 0.9em;
-    color: #ccc;
-    margin-top: 30px;
+    font-size: 1em;
+    color: var(--text-muted);
+    margin-top: 40px;
+    line-height: 1.5;
 }
 
 
 /* === BUTTON STYLING (Used in Hero and Contact) === */
 button {
-  background:linear-gradient(90deg,#00bfff,#0077ff);
-  border:none; padding:0.8em 2.2em;
-  color:#fff; font-size:1.1em;
+  background:linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  border:none; padding:1em 2.5em;
+  color:var(--text-light); font-size:1.1em;
   border-radius:10px; cursor:pointer;
   transition:all .3s ease;
+  font-weight: 600;
+  box-shadow: var(--max-shadow); /* Clean shadow */
 }
 button:hover {
-  transform:scale(1.1);
+  transform:translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5); /* Lifted shadow, but not a heavy glow */
 }
 
-/* === FEATURES SECTION === */
+/* === FEATURES SECTION (Scroll Animation) === */
 .features {
   display:flex;
   justify-content:center;
-  gap:50px;
+  gap:30px;
   flex-wrap:wrap;
-  padding:100px 20px;
+  padding:100px 60px;
   z-index:2;
   position:relative;
+  /* Initial state for scroll animation */
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+/* Class added by JavaScript Intersection Observer */
+.features.in-view {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .feature {
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
+  background:var(--card-bg);
+  border:1px solid var(--border-color);
   border-radius:20px;
-  width:300px;
-  padding:30px;
+  width:320px;
+  padding:40px;
   text-align:center;
   transition:0.4s;
-  box-shadow:0 0 30px rgba(0,0,0,0.4);
+  box-shadow:var(--max-shadow); /* Clean shadow */
+  /* Individual card animation */
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
+/* Staggered transition delay added when parent section is in view */
+.features.in-view .feature:nth-child(1) { transition-delay: 0.4s; opacity: 1; transform: scale(1); }
+.features.in-view .feature:nth-child(2) { transition-delay: 0.5s; opacity: 1; transform: scale(1); }
+.features.in-view .feature:nth-child(3) { transition-delay: 0.6s; opacity: 1; transform: scale(1); }
+
+
 .feature:hover {
-  transform:translateY(-10px);
-  box-shadow:0 0 20px rgba(0,0,0,0.7);
+  transform:translateY(-10px) scale(1.05);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7); /* Deep, clean shadow on hover */
 }
 .feature h2 {
-  color:#00bfff;
-  margin-bottom:10px;
+  color:var(--primary-color);
+  margin-bottom:15px;
+  font-size: 1.8em;
+}
+.feature p {
+    font-size: 1em;
+    color: var(--text-muted);
 }
 
 /* === FOOTER === */
@@ -159,7 +289,44 @@ footer {
   text-align:center;
   padding:30px 0;
   font-size:0.9em;
-  color:#aaa;
-  border-top:1px solid rgba(255,255,255,0.1);
+  color:var(--text-muted);
+  border-top:1px solid var(--border-color);
   background:rgba(255,255,255,0.03);
+}
+
+/* === MEDIA QUERIES (Responsiveness) === */
+@media (max-width: 768px) {
+    header {
+        padding: 15px 30px;
+    }
+    .logo {
+        font-size: 1.4em;
+    }
+    nav a {
+        margin-left: 15px;
+        font-size: 0.9em;
+    }
+    .hero h1 {
+        font-size: 3em;
+    }
+    .hero p {
+        font-size: 1.1em;
+    }
+    .content-section {
+        padding: 80px 30px;
+    }
+    .content-section h2 {
+        font-size: 2em;
+    }
+    .features {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        padding: 80px 30px;
+    }
+    .feature {
+        width: 100%;
+        max-width: 350px;
+        padding: 30px;
+    }
 }
